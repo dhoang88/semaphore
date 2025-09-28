@@ -36,3 +36,72 @@ ssh-copy-id -i ~/.ssh/id_ansible.pub ansible@<guest-ip>
 Repeat for all VMs/LXCs.
 
 Now Semaphore can connect as ansible without a password.
+
+
+1️⃣ Make sure you have a key
+
+Inside your Semaphore container:
+
+ls ~/.ssh/id_ansible.pub
+
+
+If the file exists, that’s your public key.
+
+If not, generate it:
+
+ssh-keygen -t ed25519 -f ~/.ssh/id_ansible
+
+
+Press Enter to skip passphrase (so Semaphore can login automatically).
+
+2️⃣ Copy the public key to a guest
+
+Use ssh-copy-id:
+
+ssh-copy-id -i ~/.ssh/id_ansible.pub ansible@<GUEST_IP>
+
+
+
+
+
+
+
+
+
+
+
+
+
+Step 1: Give ansible user sudo privileges
+
+On each LXC/VM:
+
+# Debian/Ubuntu
+sudo usermod -aG sudo ansible
+
+# RHEL/CentOS
+sudo usermod -aG wheel ansible
+
+Step 2: Enable passwordless sudo (recommended for automation)
+
+Edit sudoers:
+
+sudo visudo
+
+
+Add:
+
+ansible ALL=(ALL) NOPASSWD:ALL
+
+
+This allows the ansible user to run any command with sudo without entering a password.
+
+Step 3: Verify
+
+Log in via SSH from your Semaphore container:
+
+ssh -i /opt/semaphore/tmp/project_1/.ssh/id_ansible ansible@192.168.0.169
+sudo ls /root
+
+
+You should not be prompted for a password.
