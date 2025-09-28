@@ -1,0 +1,36 @@
+---
+- name: Snapshot VMs/LXCs before update
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Take Proxmox snapshot (only for VMs)
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: "{{ proxmox_password }}"
+        api_host: 192.168.0.10   # your Proxmox host
+        vmid: "{{ ansible_host_vmid }}"
+        state: snapshot
+        snapshot_name: "pre-update-{{ ansible_date_time.date }}"
+      when: "'vm' in group_names"
+
+- name: Update all Linux systems
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package list
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Upgrade packages
+      apt:
+        upgrade: dist
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update packages for RHEL/Fedora
+      dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
