@@ -62,16 +62,6 @@ ssh-copy-id -i ~/.ssh/id_ansible.pub ansible@<GUEST_IP>
 
 
 
-
-
-
-
-
-
-
-
-
-
 Step 1: Give ansible user sudo privileges
 
 On each LXC/VM:
