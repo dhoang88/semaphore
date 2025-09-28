@@ -95,3 +95,66 @@ sudo ls /root
 
 
 You should not be prompted for a password.
+
+
+If it still says permission denied
+
+
+1️⃣ Log in as root on the guest
+
+From Semaphore or Proxmox host:
+
+ssh root@192.168.0.61
+
+
+or use pct enter <CTID> for an LXC.
+
+2️⃣ Create the .ssh directory for ansible
+mkdir -p /home/ansible/.ssh
+chown ansible:ansible /home/ansible/.ssh
+chmod 700 /home/ansible/.ssh
+
+3️⃣ Copy your public key manually
+
+On Semaphore, print the key:
+
+cat ~/.ssh/id_ansible.pub
+
+
+It will look something like:
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE1… user@semaphore
+
+
+On the guest, create the authorized_keys file:
+
+nano /home/ansible/.ssh/authorized_keys
+
+
+Paste the public key into this file.
+
+Save and exit.
+
+4️⃣ Set correct permissions
+chown ansible:ansible /home/ansible/.ssh/authorized_keys
+chmod 600 /home/ansible/.ssh/authorized_keys
+
+5️⃣ Test login
+
+From Semaphore:
+
+ssh -i ~/.ssh/id_ansible ansible@192.168.0.61
+
+
+You should log in without a password.
+
+If it still fails, check /etc/ssh/sshd_config on the guest:
+
+PubkeyAuthentication yes
+PasswordAuthentication yes   # temporary to allow setup
+
+
+Then restart SSH:
+
+systemctl restart ssh
+
