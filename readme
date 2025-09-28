@@ -1,0 +1,38 @@
+1️⃣ Where to create the user
+
+You create the ansible user on the VMs and LXCs you want to manage, not inside Semaphore.
+
+This user is what Ansible/Semaphore will log in as.
+
+Example for Ubuntu/Debian inside the VM/LXC:
+
+sudo adduser ansible
+sudo usermod -aG sudo ansible
+
+
+On CentOS/Fedora/RHEL:
+
+sudo adduser ansible
+sudo usermod -aG wheel ansible
+
+2️⃣ Where to generate the SSH key
+
+Generate SSH key inside your Semaphore container (the LXC running Semaphore).
+
+This key allows passwordless login to all your VMs/LXCs.
+
+ssh-keygen -t ed25519 -f ~/.ssh/id_ansible
+
+
+Don’t add a passphrase, or Semaphore won’t be able to login automatically.
+
+3️⃣ Copy the public key to the guests
+
+Inside Semaphore LXC:
+
+ssh-copy-id -i ~/.ssh/id_ansible.pub ansible@<guest-ip>
+
+
+Repeat for all VMs/LXCs.
+
+Now Semaphore can connect as ansible without a password.
