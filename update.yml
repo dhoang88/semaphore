@@ -13,6 +13,28 @@
         snapshot_name: "pre-update-{{ ansible_date_time.date }}"
       when: "'vm' in group_names"
 
+- name: Update Git repositories in LXCs
+  hosts: lxcs
+  become: yes
+  tasks:
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Pull Beszel repo
+      ansible.builtin.git:
+        repo: "https://github.com/community-scripts/ProxmoxVE.git"
+        dest: /opt/beszel
+        update: yes
+
+    - name: Pull custom repo
+      ansible.builtin.git:
+        repo: "git@github.com:yourusername/other-repo.git"
+        dest: /opt/other-repo
+        update: yes
+
 - name: Update all Linux systems
   hosts: all
   become: yes
